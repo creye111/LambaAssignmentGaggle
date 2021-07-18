@@ -35,8 +35,8 @@ public class DatabaseHelper {
 
     /**
      *  Establishes connection with mysql database with the fields.
-     * @return
-     * @throws SQLException
+     * @return Connection with database.
+     * @throws SQLException when no connection can be established with given params.
      */
     public Connection getConnection() throws SQLException {
         Connection dbConn = null;
@@ -52,11 +52,11 @@ public class DatabaseHelper {
     }
 
     /**
-     *
+     * Queries database for a Person with id = @id
      * @param conn  Database Connection
      * @param id    id being queried
      * @return  Person object of the result of the query if a person with that id exists, otherwise a null Person object
-     * @throws SQLException
+     * @throws SQLException Exception with database connection or query.
      */
     public Person getPersonById(Connection conn, int id) throws SQLException {
         Person res = null;
@@ -64,19 +64,17 @@ public class DatabaseHelper {
              ResultSet rs = stmt.executeQuery()) {
             if (rs.isBeforeFirst()) {
                 rs.next();
-                res.setId(id);
-                res.setFirstName(rs.getString("first_name"));
-                res.setLastName(rs.getString("last_name"));
+                res = new Person(id,rs.getString("first_name"),rs.getString("last_name"));
             }
         }
         return res;
     }
 
     /**
-     *
+     * Gets all Persons from database that match substrings of the query.
      * @param searchInput Search term entered by user
      * @return  An Person arraylist containing no duplicates
-     * @throws SQLException
+     * @throws SQLException Exception due to connection or query.
      */
     public List<Person> getPersonsWithNamesContaining(String searchInput) throws SQLException {
         Connection conn = this.getConnection();
@@ -86,7 +84,7 @@ public class DatabaseHelper {
         String searchQuery;
         LinkedHashMap<Integer,Person> persons = new LinkedHashMap<>();
 
-        //for each word separated by a space, search in first name and last name
+        //for each word separated by a space, search in first name and last name and add results to the persons LinkedHashMap
         while(st.hasMoreTokens()) {
             searchSegment = st.nextToken();
             searchQuery = "SELECT * FROM PERSON WHERE PERSON.first_name LIKE '%" + searchSegment + "%';";

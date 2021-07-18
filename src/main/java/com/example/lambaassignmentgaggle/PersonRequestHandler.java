@@ -9,10 +9,7 @@ import org.json.JSONObject;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
 
 public class PersonRequestHandler implements RequestHandler<String, String> {
 
@@ -48,6 +45,16 @@ public class PersonRequestHandler implements RequestHandler<String, String> {
         return persons;
     }
 
+    /**
+     * Obtains the request parameters and queries the database based on those parameters.
+     *
+     * Dealing with JSONObject input structured like:
+     * '{"type":[id,search],"input":[id or substring of name being searched]}'
+     *
+     * @param req Json object recieved by the lambda function.
+     * @param db    DatabaseHelper object used to interact with database.
+     * @return  String representation of the JSON results of the request.
+     */
     public String processJsonReq(String req, DatabaseHelper db) {
         JSONObject jsonRequestObject = new JSONObject(req);
         ArrayList<Person> queryResults = new ArrayList<>();
@@ -71,12 +78,9 @@ public class PersonRequestHandler implements RequestHandler<String, String> {
 
             jsonBody.put("persons", persons);
 
-        } catch (SQLException e) {
+        } catch (SQLException | JSONException e) {
             jsonBody.put("persons", "");
             jsonBody.put("exception", e.getMessage());
-        } catch (JSONException ex) {
-            jsonBody.put("persons", "");
-            jsonBody.put("exception", ex.getMessage());
         }
         return jsonBody.toString();
     }
